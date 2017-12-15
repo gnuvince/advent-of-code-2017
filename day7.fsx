@@ -86,6 +86,18 @@ let rec allEqual (ints: int list) : bool =
         | [_] -> true
         | x :: y :: rest -> x = y && allEqual (y :: rest)
 
+let treeToString tree =
+    match tree with
+        | Leaf(name, weight) -> sprintf "%s_%d_%d" name weight (weightTree tree)
+        | Node(name, weight, _) -> sprintf "%s_%d_%d" name weight (weightTree tree)
+
+let rec treeToDot tree =
+    match tree with
+        | Leaf (_, _) -> ""
+        | Node (name, weight, children) ->
+            let childrenLinks = List.map treeToDot children
+            let thisLink = List.map (fun child -> sprintf "%s -> %s;\n" (treeToString tree) (treeToString child)) children
+            (childrenLinks @ thisLink) |> List.fold (+) ""
 
 let part2 (filename: string) : string =
     let entries = filename |> parse
@@ -94,8 +106,6 @@ let part2 (filename: string) : string =
     let parentToChildren = revLinks childToParent
     let weights = buildWeightTable entries
     let tree = buildTree root parentToChildren weights
-    printfn "%A" tree
-    printfn "%A" (weightTree tree)
-    ""
+    treeToDot tree
 
-part2 "day7.example"
+"day7.input" |> part2 |> printfn "%A"
